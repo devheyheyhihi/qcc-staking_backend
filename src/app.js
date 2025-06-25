@@ -49,12 +49,25 @@ const findAvailablePort = async (startPort) => {
 
 // CORS 설정
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://localhost:3000',
-    'https://localhost:3001'
-  ],
+  origin: (origin, callback) => {
+    // 허용할 도메인 목록
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://localhost:3000',
+      'https://localhost:3001'
+    ];
+    
+    // Vercel 도메인 패턴 허용
+    const isVercelDomain = origin && origin.includes('vercel.app');
+    
+    // origin이 없는 경우 (모바일, Postman 등) 또는 허용된 도메인인 경우
+    if (!origin || allowedOrigins.includes(origin) || isVercelDomain) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
