@@ -39,7 +39,11 @@ class BlockchainService {
   }
 
   /**
-   * 스테이킹 보상 전송 (실제 QTC 블록체인 전송)
+   * 스테이킹 보상 전송 (실제 QCC 블록체인 전송)
+   * @param {string} toAddress - 받을 지갑 주소
+   * @param {number} amount - 전송할 금액
+   * @param {string} memo - 메모 (선택사항)
+   * @returns {Promise<string>} 트랜잭션 해시
    */
   async sendStakingReward({ toAddress, amount }) {
     try {
@@ -49,7 +53,7 @@ class BlockchainService {
       console.log(`   🏦 스테이킹 풀: ${this.stakingPoolAddress || '❌ 없음'}`);
       console.log(`   💸 실제 전송: ${this.enableRealTransactions ? '✅ 활성화' : '🔍 DRY RUN'}`);
       console.log(`   👤 수신자: ${toAddress}`);
-      console.log(`   💰 금액: ${amount} QTC`);
+      console.log(`   💰 금액: ${amount} QCC`);
       console.log(`   🔄 전송 방향: 스테이킹풀 → 사용자`);
 
       // Private Key 확인

@@ -68,7 +68,7 @@ async function processExpiredStakings() {
  */
 async function processSingleStaking(staking) {
   console.log(`   👤 지갑: ${staking.wallet_address}`);
-  console.log(`   💰 원금: ${staking.staked_amount} QTC`);
+  console.log(`   💰 원금: ${staking.staked_amount} QCC`);
   console.log(`   📅 기간: ${staking.staking_period}일`);
   console.log(`   📊 이자율: ${staking.interest_rate}%`);
   console.log(`   ⏰ 만료일: ${staking.end_date}`);
@@ -82,8 +82,8 @@ async function processSingleStaking(staking) {
   
   const totalReturnAmount = parseFloat(staking.staked_amount) + parseFloat(interestAmount);
   
-  console.log(`   🎯 이자: ${interestAmount} QTC`);
-  console.log(`   💎 총 반환액: ${totalReturnAmount} QTC`);
+  console.log(`   🎯 이자: ${interestAmount} QCC`);
+  console.log(`   💎 총 반환액: ${totalReturnAmount} QCC`);
   
   // 2. 실제 블록체인 송금
   let transactionHash = null;
@@ -164,8 +164,8 @@ async function printStakingStats() {
     
     console.log(`   📊 총 스테이킹 수: ${stats.total_count}개`);
     console.log(`   🟢 활성 스테이킹: ${stats.active_count}개`);
-    console.log(`   💰 총 활성 금액: ${stats.total_active_amount || 0} QTC`);
-    console.log(`   🎁 총 지급 보상: ${stats.total_earned_rewards || 0} QTC`);
+    console.log(`   💰 총 활성 금액: ${stats.total_active_amount || 0} QCC`);
+    console.log(`   🎁 총 지급 보상: ${stats.total_earned_rewards || 0} QCC`);
     
   } catch (error) {
     console.error('통계 조회 실패:', error);

@@ -2,8 +2,8 @@ const { ethers } = require('ethers');
 require('dotenv').config();
 
 /**
- * 블록체인 트랜잭션 유틸리티
- * QTC 토큰 전송 및 관련 기능 제공
+ * 블록체인 유틸리티 클래스
+ * QCC 토큰 전송 및 관련 기능 제공
  */
 
 class BlockchainService {
@@ -25,30 +25,30 @@ class BlockchainService {
   }
 
   /**
-   * QTC 토큰 전송
-   * @param {string} toAddress - 받는 주소
-   * @param {string} amount - 전송할 QTC 양 (예: "1.5")
-   * @param {string} memo - 트랜잭션 메모 (선택사항)
-   * @returns {Promise<Object>} 트랜잭션 결과
+   * QCC 토큰 전송
+   * @param {string} toAddress - 받을 지갑 주소
+   * @param {string} amount - 전송할 QCC 양 (예: "1.5")
+   * @param {string} memo - 메모 (선택사항)
+   * @returns {Promise<string>} 트랜잭션 해시
    */
-  async sendQTC(toAddress, amount, memo = '') {
+  async sendQCC(toAddress, amount, memo = '') {
     try {
-      console.log(`💸 QTC 전송 시작: ${amount} QTC → ${toAddress}`);
+      console.log(`💸 QCC 전송 시작: ${amount} QCC → ${toAddress}`);
       
       // 주소 검증
       if (!ethers.isAddress(toAddress)) {
         throw new Error(`잘못된 주소 형식: ${toAddress}`);
       }
       
-      // 금액을 Wei 단위로 변환 (QTC는 18 decimals)
-      const amountWei = ethers.parseEther(amount.toString());
+      // 금액을 Wei 단위로 변환 (QCC는 18 decimals)
+      const amountWei = ethers.parseEther(amount);
       
       // 현재 잔액 확인
       const balance = await this.provider.getBalance(this.wallet.address);
-      console.log(`💰 현재 잔액: ${ethers.formatEther(balance)} QTC`);
+      console.log(`💰 현재 잔액: ${ethers.formatEther(balance)} QCC`);
       
       if (balance < amountWei) {
-        throw new Error(`잔액 부족: 필요 ${amount} QTC, 보유 ${ethers.formatEther(balance)} QTC`);
+        throw new Error(`잔액 부족: 필요 ${amount} QCC, 보유 ${ethers.formatEther(balance)} QCC`);
       }
       
       // 가스 가격 및 한도 설정
@@ -125,7 +125,7 @@ class BlockchainService {
   /**
    * 잔액 조회
    * @param {string} address - 조회할 주소 (선택사항, 기본값: 현재 지갑)
-   * @returns {Promise<string>} QTC 잔액
+   * @returns {Promise<string>} QCC 잔액
    */
   async getBalance(address = null) {
     try {
