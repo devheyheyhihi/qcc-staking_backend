@@ -1,0 +1,17 @@
+# 스테이킹 만료 처리 크론 작업
+# 매일 자정(00:00)과 낮 12시(12:00)에 실행
+
+# 매일 자정에 만료된 스테이킹 처리
+0 0 * * * /Users/sinseonghyeon/Documents/GitHub/01-blockchain-projects/maxpia-project/qt_staking/backend/scripts/cron-process-expired.sh
+
+# 매일 낮 12시에도 만료된 스테이킹 처리 (추가 안전장치)
+0 12 * * * /Users/sinseonghyeon/Documents/GitHub/01-blockchain-projects/maxpia-project/qt_staking/backend/scripts/cron-process-expired.sh
+
+# 크론 작업 설명:
+# 분 시 일 월 요일 명령어
+# 0  0  *  *  *    매일 자정
+# 0  12 *  *  *    매일 낮 12시
+# *  *  *  *  *    매분 (테스트용 - 사용하지 말 것!)
+
+# 테스트용 (5분마다 실행 - 필요시 주석 해제)
+# */5 * * * * /Users/sinseonghyeon/Documents/GitHub/01-blockchain-projects/maxpia-project/qt_staking/backend/scripts/cron-process-expired.sh 

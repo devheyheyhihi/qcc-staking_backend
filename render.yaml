@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: qt-staking-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: qt-staking-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        value: Test123!
+      - key: CORS_ORIGIN
+        value: https://qt-staking.vercel.app
+
+databases:
+  - name: qt-staking-db
+    databaseName: qt_staking
+    user: qt_staking_user
+    plan: free 

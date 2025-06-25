@@ -1,0 +1,41 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "migrate": "node scripts/migrate_transaction_hash.js",
+    "check-expired": "node scripts/checkExpiredStakings.js",
+    "check-expired-dry": "node scripts/checkExpiredStakings.js --dry-run",
+    "check-upcoming": "node scripts/checkExpiredStakings.js --upcoming 7",
+    "cron:start": "./scripts/cron-manager.sh start",
+    "cron:stop": "./scripts/cron-manager.sh stop",
+    "cron:status": "./scripts/cron-manager.sh status",
+    "cron:logs": "./scripts/cron-manager.sh logs",
+    "cron:test": "./scripts/cron-manager.sh test",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "decimal.js": "^10.5.0",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "sqlite3": "^5.1.7",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
