@@ -223,12 +223,18 @@ class StakingController {
         });
       }
 
-      const result = await Staking.cancel(id);
+      // 실제 블록체인 트랜잭션을 포함한 취소 처리
+      const result = await Staking.cancel(id, walletAddress);
 
       res.json({
         success: true,
-        message: '스테이킹이 취소되었습니다.',
-        data: result
+        message: result.message,
+        data: {
+          stakingId: id,
+          transactionHash: result.transactionHash,
+          returnedAmount: result.returnedAmount,
+          isDryRun: result.isDryRun
+        }
       });
 
     } catch (error) {

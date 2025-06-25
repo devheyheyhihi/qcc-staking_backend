@@ -1,4 +1,6 @@
 const database = require('../config/database');
+const { calculateInterestReward } = require('../utils/stakingCalculator');
+const blockchainService = require('../services/blockchainService');
 
 class Staking {
   constructor() {
@@ -276,28 +278,78 @@ class Staking {
     });
   }
 
-  // 스테이킹 취소 (중도 해지)
-  async cancel(id) {
-    return new Promise((resolve, reject) => {
-      // 먼저 현재 스테이킹 정보 조회
-      this.findById(id).then(staking => {
-        if (!staking) {
-          reject(new Error('스테이킹을 찾을 수 없습니다.'));
-          return;
-        }
+  /**
+   * 스테이킹 취소 (실제 블록체인 트랜잭션 포함)
+   * @param {number} id - 스테이킹 ID
+   * @param {string} walletAddress - 지갑 주소 (검증용)
+   * @returns {Promise<Object>} 취소 결과
+   */
+  async cancel(id, walletAddress) {
+    try {
+      // 1. 스테이킹 정보 조회
+      const staking = await this.findById(id);
+      if (!staking) {
+        throw new Error('스테이킹을 찾을 수 없습니다');
+      }
 
-        if (staking.status !== 'active') {
-          reject(new Error('활성 상태가 아닌 스테이킹은 취소할 수 없습니다.'));
-          return;
-        }
+      // 2. 권한 확인 (지갑 주소 일치)
+      if (staking.wallet_address !== walletAddress) {
+        throw new Error('해당 스테이킹을 취소할 권한이 없습니다');
+      }
 
-        // 중도 해지 시 실제 보상 계산 (예: 50% 패널티)
-        const penaltyRate = 0.5;
-        const actualReward = staking.expected_reward * penaltyRate;
+      // 3. 상태 확인 (active만 취소 가능)
+      if (staking.status !== 'active') {
+        throw new Error('활성 상태의 스테이킹만 취소할 수 있습니다');
+      }
 
-        this.updateStatus(id, 'cancelled', actualReward).then(resolve).catch(reject);
-      }).catch(reject);
-    });
+      console.log(`🔄 스테이킹 취소 시작: ID ${id}, 원금 ${staking.staked_amount} QCC`);
+
+      // 4. 실제 블록체인 트랜잭션 실행 (원금만 반환)
+      const transactionResult = await blockchainService.sendStakingReward({
+        toAddress: staking.wallet_address,
+        amount: parseFloat(staking.staked_amount) // 원금만 반환
+      });
+
+      if (!transactionResult.success) {
+        throw new Error('블록체인 트랜잭션 실행 실패');
+      }
+
+      console.log(`✅ 취소 트랜잭션 성공: ${transactionResult.txHash}`);
+
+      // 5. 데이터베이스 업데이트
+      const query = `
+        UPDATE stakings 
+        SET status = 'cancelled',
+            actual_reward = 0,
+            return_transaction_hash = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+
+      await new Promise((resolve, reject) => {
+        this.db.run(query, [transactionResult.txHash, id], function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(this.changes);
+          }
+        });
+      });
+
+      console.log(`✅ 스테이킹 취소 완료: ID ${id}`);
+
+      return {
+        success: true,
+        message: '스테이킹이 성공적으로 취소되었습니다',
+        transactionHash: transactionResult.txHash,
+        returnedAmount: staking.staked_amount,
+        isDryRun: transactionResult.isDryRun || false
+      };
+
+    } catch (error) {
+      console.error('❌ 스테이킹 취소 실패:', error.message);
+      throw error;
+    }
   }
 
   // 스테이킹 완료 처리
