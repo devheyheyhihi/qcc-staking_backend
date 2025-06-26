@@ -16,14 +16,7 @@ class Database {
   }
 
   initTables() {
-    // 직렬화를 통해 순차적으로 실행
     this.db.serialize(() => {
-      // 기존 테이블 삭제
-      this.db.run(`DROP TABLE IF EXISTS rewards`);
-      this.db.run(`DROP TABLE IF EXISTS transactions`);
-      this.db.run(`DROP TABLE IF EXISTS staking_records`);
-      this.db.run(`DROP TABLE IF EXISTS users`);
-
       // 스테이킹 테이블 생성 (transaction_hash 컬럼 포함)
       this.db.run(`
         CREATE TABLE IF NOT EXISTS stakings (
@@ -47,8 +40,6 @@ class Database {
           console.error('❌ 스테이킹 테이블 생성 실패:', err.message);
         } else {
           console.log('✅ 스테이킹 테이블 생성 완료');
-          
-          // 이자율 테이블 생성
           this.createInterestRateTable();
         }
       });
@@ -69,41 +60,53 @@ class Database {
         console.error('❌ 이자율 테이블 생성 실패:', err.message);
       } else {
         console.log('✅ 이자율 테이블 생성 완료');
-        
-        // 기본 이자율 데이터 삽입
         this.insertDefaultInterestRates();
       }
     });
   }
 
   insertDefaultInterestRates() {
-    const defaultRates = [
-      { period: 30, rate: 3.0 },
-      { period: 90, rate: 6.0 },
-      { period: 180, rate: 10.0 },
-      { period: 365, rate: 15.0 }
-    ];
-
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO interest_rates (period, rate, updated_at) 
-      VALUES (?, ?, CURRENT_TIMESTAMP)
-    `);
-
-    defaultRates.forEach(({ period, rate }) => {
-      stmt.run([period, rate], (err) => {
-        if (err) {
-          console.error(`❌ 기본 이자율 삽입 실패 (${period}일):`, err.message);
-        }
-      });
-    });
-
-    stmt.finalize((err) => {
+    // 데이터가 이미 있는지 확인
+    this.db.get('SELECT COUNT(*) as count FROM interest_rates', (err, row) => {
       if (err) {
-        console.error('❌ 기본 이자율 삽입 완료 실패:', err.message);
+        console.error('❌ 이자율 데이터 확인 실패:', err.message);
+        return;
+      }
+
+      // 데이터가 없는 경우에만 기본값 삽입
+      if (row.count === 0) {
+        console.log('🌱 기본 이자율 데이터 삽입 중...');
+        const defaultRates = [
+          { period: 30, rate: 3.0 },
+          { period: 90, rate: 6.0 },
+          { period: 180, rate: 10.0 },
+          { period: 365, rate: 15.0 }
+        ];
+
+        const stmt = this.db.prepare(`
+          INSERT INTO interest_rates (period, rate) VALUES (?, ?)
+        `);
+
+        defaultRates.forEach(({ period, rate }) => {
+          stmt.run([period, rate], (err) => {
+            if (err) {
+              console.error(`❌ 기본 이자율 삽입 실패 (${period}일):`, err.message);
+            }
+          });
+        });
+
+        stmt.finalize((err) => {
+          if (err) {
+            console.error('❌ 기본 이자율 삽입 완료 실패:', err.message);
+          } else {
+            console.log('✅ 기본 이자율 데이터 삽입 완료');
+          }
+          // 관리자 테이블 생성은 항상 호출
+          this.createAdminAuthTable();
+        });
       } else {
-        console.log('✅ 기본 이자율 데이터 삽입 완료');
-        
-        // 관리자 인증 테이블 생성
+        console.log('✅ 기존 이자율 데이터가 존재하여, 삽입을 건너뜁니다.');
+        // 관리자 테이블 생성은 항상 호출
         this.createAdminAuthTable();
       }
     });

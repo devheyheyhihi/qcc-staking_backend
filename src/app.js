@@ -55,7 +55,11 @@ const corsOptions = {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://localhost:3000',
-      'https://localhost:3001'
+      'https://localhost:3001',
+      'http://210.95.247.247',
+      'https://210.95.247.247',
+      'http://staking.quantumchain.it',
+      'https://staking.quantumchain.it'
     ];
     
     // Vercel 도메인 패턴 허용
