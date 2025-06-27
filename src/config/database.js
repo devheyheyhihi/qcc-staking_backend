@@ -78,9 +78,9 @@ class Database {
         console.log('🌱 기본 이자율 데이터 삽입 중...');
         const defaultRates = [
           { period: 30, rate: 2.0 },
-          { period: 90, rate: 3.0 },
-          { period: 180, rate: 5.0 },
-          { period: 365, rate: 8.0 }
+          { period: 90, rate: 4.0 },
+          { period: 180, rate: 8.0 },
+          { period: 365, rate: 10.0 }
         ];
 
         const stmt = this.db.prepare(`
