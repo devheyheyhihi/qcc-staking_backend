@@ -1,5 +1,4 @@
 const database = require('../config/database');
-const { calculateInterestReward } = require('../utils/stakingCalculator');
 const blockchainService = require('../services/blockchainService');
 
 class Staking {
