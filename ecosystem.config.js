@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'qcc-staking-backend',
     script: 'src/app.js',
-    cwd: '/home/maxpia/qcc_staking/qcc-staking_backend',
+    cwd: '/home/ubuntu/qcc-staking_backend',
     instances: 1,
     exec_mode: 'fork',
     env: {

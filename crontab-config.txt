@@ -2,16 +2,20 @@
 # 매일 자정(00:00)과 낮 12시(12:00)에 실행
 
 # 매일 자정에 만료된 스테이킹 처리
-0 0 * * * /home/maxpia/qcc_staking/qcc-staking_backend/scripts/cron-process-expired.sh
+0 0 * * * ~/qcc-staking_backend/scripts/cron-process-expired.sh
 
 # 매일 낮 12시에도 만료된 스테이킹 처리 (추가 안전장치)
-0 12 * * * /home/maxpia/qcc_staking/qcc-staking_backend/scripts/cron-process-expired.sh
+0 12 * * * ~/qcc-staking_backend/scripts/cron-process-expired.sh
+
+# 매일 새벽 2시에 유효하지 않은 트랜잭션 검증 및 삭제
+0 2 * * * cd ~/qcc-staking_backend && node scripts/validateTransactions.js >> ~/qcc-staking_backend/logs/validate-transactions.log 2>&1
 
 # 크론 작업 설명:
 # 분 시 일 월 요일 명령어
-# 0  0  *  *  *    매일 자정
-# 0  12 *  *  *    매일 낮 12시
+# 0  0  *  *  *    매일 자정 - 만료된 스테이킹 처리
+# 0  12 *  *  *    매일 낮 12시 - 만료된 스테이킹 처리 (추가 안전장치)
+# 0  2  *  *  *    매일 새벽 2시 - 유효하지 않은 트랜잭션 검증 및 삭제
 # *  *  *  *  *    매분 (테스트용 - 사용하지 말 것!)
 
 # 테스트용 (5분마다 실행 - 필요시 주석 해제)
-# */5 * * * * /home/maxpia/qcc_staking/qcc-staking_backend/scripts/cron-process-expired.sh 
+# */5 * * * * ~/qcc-staking_backend/scripts/cron-process-expired.sh
