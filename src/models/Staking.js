@@ -108,7 +108,7 @@ class Staking {
   }
 
   // 전체 스테이킹 목록 조회 (페이지네이션 지원)
-  async findAll(page = 1, limit = 50, status = null) {
+  async findAll(page = 1, limit = 50, status = null, search = null) {
     return new Promise((resolve, reject) => {
       const offset = (page - 1) * limit;
       let sql = `
@@ -124,6 +124,17 @@ class Staking {
         countSql += ` WHERE status = ?`;
         params.push(status);
         countParams.push(status);
+      }
+
+      // 검색 필터링 (지갑주소/트랜잭션 해시)
+      if (search) {
+        const hasWhere = sql.includes('WHERE');
+        const searchClause = `(wallet_address LIKE ? OR transaction_hash LIKE ? OR return_transaction_hash LIKE ?)`;
+        sql += hasWhere ? ` AND ${searchClause}` : ` WHERE ${searchClause}`;
+        countSql += countSql.includes('WHERE') ? ` AND ${searchClause}` : ` WHERE ${searchClause}`;
+        const like = `%${search}%`;
+        params.push(like, like, like);
+        countParams.push(like, like, like);
       }
 
       sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;

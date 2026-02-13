@@ -171,6 +171,7 @@ class StakingController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 50;
       const status = req.query.status || null;
+      const search = req.query.search ? String(req.query.search).trim() : null;
 
       // 페이지와 제한값 유효성 검사
       if (page < 1 || limit < 1 || limit > 100) {
@@ -180,7 +181,7 @@ class StakingController {
         });
       }
 
-      const result = await Staking.findAll(page, limit, status);
+      const result = await Staking.findAll(page, limit, status, search);
       
       res.json({
         success: true,
