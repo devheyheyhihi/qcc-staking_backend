@@ -252,6 +252,20 @@ class Staking {
     });
   }
 
+  // 스테이킹 삭제 (관리자용)
+  async deleteById(id) {
+    return new Promise((resolve, reject) => {
+      const sql = `DELETE FROM stakings WHERE id = ?`;
+      this.db.run(sql, [id], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ id, changes: this.changes });
+        }
+      });
+    });
+  }
+
   // 스테이킹 상태 업데이트 (반환 트랜잭션 해시 포함)
   async updateStatusWithTransaction(id, status, actualReward = null, returnTransactionHash = null) {
     return new Promise((resolve, reject) => {

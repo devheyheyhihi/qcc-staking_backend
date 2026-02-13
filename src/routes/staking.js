@@ -32,10 +32,16 @@ router.post('/', stakingController.createStaking);
 // 특정 지갑의 스테이킹 목록 조회
 router.get('/wallet/:walletAddress', stakingController.getStakingsByWallet);
 
+// 트랜잭션 재검증 (관리자용)
+router.put('/:id/revalidate', stakingController.revalidateStakingTransaction);
+
 // 특정 스테이킹 상세 조회
 router.get('/:id', stakingController.getStakingById);
 
 // 스테이킹 취소 (중도 해지)
 router.put('/:id/cancel', stakingController.cancelStaking);
+
+// 스테이킹 삭제 (관리자용)
+router.delete('/:id', stakingController.deleteStaking);
 
 module.exports = router; 

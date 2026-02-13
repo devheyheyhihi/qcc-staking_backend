@@ -8,7 +8,7 @@
 0 12 * * * ~/qcc-staking_backend/scripts/cron-process-expired.sh
 
 # 매일 새벽 2시에 유효하지 않은 트랜잭션 검증 및 삭제
-0 2 * * * cd ~/qcc-staking_backend && node scripts/validateTransactions.js >> ~/qcc-staking_backend/logs/validate-transactions.log 2>&1
+0 2 * * * ~/qcc-staking_backend/scripts/cron-validate-transactions.sh
 
 # 크론 작업 설명:
 # 분 시 일 월 요일 명령어

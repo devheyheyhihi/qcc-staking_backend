@@ -82,12 +82,15 @@ npm run cron:test
 ### 로그 파일 위치
 ```
 backend/logs/cron-expired-YYYYMMDD.log
+backend/logs/validate-transactions-YYYYMMDD.log
 ```
 
 ### 로그 파일 예시
 ```
 backend/logs/cron-expired-20250624.log
 backend/logs/cron-expired-20250625.log
+backend/logs/validate-transactions-20250624.log
+backend/logs/validate-transactions-20250625.log
 ```
 
 ### 로그 확인 방법
@@ -97,9 +100,11 @@ npm run cron:logs
 
 # 특정 날짜 로그 확인
 cat logs/cron-expired-20250624.log
+cat logs/validate-transactions-20250624.log
 
 # 실시간 로그 모니터링 (새 로그 생성 시)
 tail -f logs/cron-expired-$(date +%Y%m%d).log
+tail -f logs/validate-transactions-$(date +%Y%m%d).log
 ```
 
 ## 🔍 트러블슈팅

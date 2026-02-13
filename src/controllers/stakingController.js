@@ -1,6 +1,7 @@
 const Staking = require('../models/Staking');
 const InterestRate = require('../models/InterestRate');
 const AdminAuth = require('../models/AdminAuth');
+const { validateTransaction } = require('../services/transactionValidator');
 
 // 보상 계산 함수
 const calculateReward = (stakedAmount, interestRate, periodDays) => {
@@ -114,11 +115,15 @@ class StakingController {
       }
 
       const stakings = await Staking.findByWalletAddress(walletAddress);
+      const mappedStakings = stakings.map(staking => ({
+        ...staking,
+        status: staking.status === 'invalid' ? 'pending' : staking.status
+      }));
       
       res.json({
         success: true,
-        data: stakings,
-        count: stakings.length
+        data: mappedStakings,
+        count: mappedStakings.length
       });
 
     } catch (error) {
@@ -242,6 +247,113 @@ class StakingController {
       res.status(500).json({
         success: false,
         message: error.message || '스테이킹 취소 중 오류가 발생했습니다.',
+        error: error.message
+      });
+    }
+  }
+
+  // 트랜잭션 재검증 (관리자용)
+  async revalidateStakingTransaction(req, res) {
+    try {
+      const { id } = req.params;
+      const staking = await Staking.findById(id);
+
+      if (!staking) {
+        return res.status(404).json({
+          success: false,
+          message: '스테이킹을 찾을 수 없습니다.'
+        });
+      }
+
+      if (staking.status !== 'invalid') {
+        return res.status(400).json({
+          success: false,
+          message: 'invalid 상태인 스테이킹만 재검증할 수 있습니다.'
+        });
+      }
+
+      if (!staking.transaction_hash) {
+        return res.status(400).json({
+          success: false,
+          message: '트랜잭션 해시가 없어 재검증할 수 없습니다.'
+        });
+      }
+
+      const validation = await validateTransaction(staking.transaction_hash);
+
+      if (validation.isValid) {
+        await Staking.updateStatus(id, 'active', staking.actual_reward);
+        return res.json({
+          success: true,
+          message: '재검증에 성공했습니다. 상태가 active로 변경되었습니다.',
+          data: {
+            id,
+            status: 'active',
+            txHash: staking.transaction_hash
+          }
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: '재검증 결과 유효하지 않은 트랜잭션입니다.',
+        data: {
+          id,
+          status: 'invalid',
+          txHash: staking.transaction_hash,
+          error: validation.error,
+          httpStatus: validation.status
+        }
+      });
+    } catch (error) {
+      console.error('트랜잭션 재검증 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '트랜잭션 재검증 중 오류가 발생했습니다.',
+        error: error.message
+      });
+    }
+  }
+
+  // 스테이킹 삭제 (관리자용)
+  async deleteStaking(req, res) {
+    try {
+      const { id } = req.params;
+      const staking = await Staking.findById(id);
+
+      if (!staking) {
+        return res.status(404).json({
+          success: false,
+          message: '스테이킹을 찾을 수 없습니다.'
+        });
+      }
+
+      if (staking.status !== 'invalid') {
+        return res.status(400).json({
+          success: false,
+          message: 'invalid 상태인 스테이킹만 삭제할 수 있습니다.'
+        });
+      }
+
+      const result = await Staking.deleteById(id);
+
+      if (result.changes === 0) {
+        return res.status(404).json({
+          success: false,
+          message: '삭제할 스테이킹을 찾을 수 없습니다.'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: '스테이킹이 삭제되었습니다.',
+        data: { id }
+      });
+    } catch (error) {
+      console.error('스테이킹 삭제 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '스테이킹 삭제 중 오류가 발생했습니다.',
         error: error.message
       });
     }
